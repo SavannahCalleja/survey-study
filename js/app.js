@@ -696,14 +696,10 @@ async function submitSurvey(ev) {
 
   const demographics = {
     age: Number(document.getElementById('age').value),
-    height: Number(document.getElementById('height').value),
-    height_unit: document.getElementById('height_unit').value,
     bio_sex: document.getElementById('bio_sex').value,
     ethnicity: document.getElementById('ethnicity').value,
     years_training: Number(document.getElementById('years_training').value),
     typical_training_minutes: Number(document.getElementById('typical_training_minutes').value),
-    current_weight: Number(document.getElementById('current_weight').value),
-    weight_unit: document.getElementById('weight_unit').value,
     days_per_week: Number(document.getElementById('days_per_week').value),
     primary_modality: primaryModalityValue,
   };
@@ -778,14 +774,10 @@ async function submitSurvey(ev) {
 
   const row = stripBackendTranscriptionColumns({
     age: demographics.age,
-    height: demographics.height,
-    height_unit: demographics.height_unit,
     bio_sex: demographics.bio_sex,
     ethnicity: demographics.ethnicity,
     years_training: demographics.years_training,
     typical_training_minutes: demographics.typical_training_minutes,
-    current_weight: demographics.current_weight,
-    weight_unit: demographics.weight_unit,
     days_per_week: demographics.days_per_week,
     primary_modality: demographics.primary_modality,
     text_q1: t1,
