@@ -323,14 +323,6 @@
       line-height: 1.45;
     }
 
-    .screening-hard-rule {
-      font-size: 0.85rem;
-      font-weight: 500;
-      color: #3d4f66;
-      margin: -0.35rem 0 0.65rem 0;
-      line-height: 1.45;
-    }
-
     .screening-question__options {
       display: flex;
       flex-wrap: wrap;
@@ -535,16 +527,6 @@
       font-weight: 700;
     }
 
-    .screening-proceed-hint {
-      margin: 0.75rem 0 0 0;
-      font-size: 0.86rem;
-      color: #4a5a6e;
-      line-height: 1.45;
-      max-width: 28rem;
-      margin-left: auto;
-      margin-right: auto;
-    }
-
     #screening-ineligible.screening-ineligible {
       display: none;
       box-sizing: border-box;
@@ -666,9 +648,6 @@
 
       <fieldset class="screening-question">
         <legend class="screening-question__legend">1. Are you between 18 and 85 years of age?</legend>
-        <p class="screening-hard-rule">
-          You must answer <strong>Yes</strong> to continue. If you answer <strong>No</strong>, you cannot take part in this study.
-        </p>
         <div class="screening-question__options">
           <label class="screening-option"><input type="radio" name="screen_age" value="yes"> Yes</label>
           <label class="screening-option"><input type="radio" name="screen_age" value="no"> No</label>
@@ -679,9 +658,6 @@
         <legend class="screening-question__legend">
           2. Are you currently engaged in regular exercise? (Note: For this study, regular exercise is defined as an average of at least 3 days per week for a minimum of 30 minutes per session. This excludes leisure-based or very low-intensity movement.)
         </legend>
-        <p class="screening-hard-rule">
-          You must answer <strong>Yes</strong> to continue. If you answer <strong>No</strong>, you cannot take part in this study.
-        </p>
         <div class="screening-question__options">
           <label class="screening-option"><input type="radio" name="screen_ten_years" value="yes"> Yes</label>
           <label class="screening-option"><input type="radio" name="screen_ten_years" value="no"> No</label>
@@ -690,9 +666,6 @@
 
       <fieldset class="screening-question">
         <legend class="screening-question__legend">3. In the last 10 years, have you had any continuous break from training longer than 3 months for reasons <em>other than</em> injury?</legend>
-        <p class="screening-hard-rule">
-          You must answer <strong>No</strong> to continue. If you answer <strong>Yes</strong>, you cannot take part in this study.
-        </p>
         <div class="screening-question__options">
           <label class="screening-option"><input type="radio" name="screen_noninjury_break" value="yes"> Yes</label>
           <label class="screening-option"><input type="radio" name="screen_noninjury_break" value="no"> No</label>
@@ -701,9 +674,6 @@
 
       <fieldset class="screening-question">
         <legend class="screening-question__legend">4. Over the last 10 years, have you had more than 5 pauses in training lasting 3 months or more (including for injuries)?</legend>
-        <p class="screening-hard-rule">
-          You must answer <strong>No</strong> to continue. If you answer <strong>Yes</strong>, you cannot take part in this study.
-        </p>
         <div class="screening-question__options">
           <label class="screening-option"><input type="radio" name="screen_pause_count" value="yes"> Yes</label>
           <label class="screening-option"><input type="radio" name="screen_pause_count" value="no"> No</label>
@@ -712,9 +682,6 @@
 
       <fieldset class="screening-question">
         <legend class="screening-question__legend">5. Do you currently train at least 3 days per week <em>and</em> at least 30 minutes per session on average?</legend>
-        <p class="screening-hard-rule">
-          You must answer <strong>Yes</strong> to continue. If you answer <strong>No</strong>, you cannot take part in this study.
-        </p>
         <div class="screening-question__options">
           <label class="screening-option"><input type="radio" name="screen_current_min" value="yes"> Yes</label>
           <label class="screening-option"><input type="radio" name="screen_current_min" value="no"> No</label>
@@ -725,9 +692,6 @@
         <button type="button" id="screening-proceed-btn" class="screening-proceed-btn" disabled aria-disabled="true">
           Proceed to survey
         </button>
-        <p class="screening-proceed-hint">
-          Answer every question. You must answer <strong>Yes</strong> to questions 1, 2, and 5, and <strong>No</strong> to questions 3 and 4, to continue to the main survey.
-        </p>
       </div>
     </div>
   </div>
