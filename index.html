@@ -760,63 +760,172 @@
         padding: 1.35rem 1.1rem 1.5rem;
       }
     }
+
+    #language-phase.language-phase {
+      box-sizing: border-box;
+      min-height: 100vh;
+      width: 100%;
+      padding: 2rem 1rem 3rem;
+      background: linear-gradient(165deg, #eef2f7 0%, #f5f6fa 45%, #e8ecf2 100%);
+    }
+
+    #language-phase.is-hidden {
+      display: none;
+    }
+
+    .language-choices {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      margin: 1.5rem 0 1.25rem;
+    }
+
+    .language-choice-btn {
+      background: #fff;
+      color: #081e3f;
+      border: 1.5px solid #B6862C;
+      border-radius: 8px;
+      padding: 0.85em 1em;
+      font-size: 1.05em;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .language-choice-btn:hover,
+    .language-choice-btn.is-selected {
+      background: #081e3f;
+      color: #fff;
+      border-color: #081e3f;
+    }
+
+    #lang-switch {
+      display: none;
+      position: fixed;
+      top: 0.75rem;
+      right: 0.75rem;
+      z-index: 40;
+      background: #fff;
+      border: 1px solid #c5d0e0;
+      border-radius: 8px;
+      padding: 0.35rem 0.5rem;
+      box-shadow: 0 4px 16px rgba(8, 30, 63, 0.1);
+    }
+
+    #lang-switch.is-visible {
+      display: block;
+    }
+
+    #lang-switch-select {
+      border: none;
+      background: transparent;
+      color: #081e3f;
+      font-weight: 700;
+      font-size: 0.9rem;
+      cursor: pointer;
+      width: auto;
+      margin: 0;
+      padding: 0.2em 0.35em;
+    }
+
+    .visually-hidden {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
   </style>
 </head>
 <body>
-<div id="screening-phase" class="screening-phase">
+<div id="lang-switch">
+  <label class="visually-hidden" for="lang-switch-select" data-i18n="langSwitchLabel">Language</label>
+  <select id="lang-switch-select" data-i18n-aria="langSwitchLabel" aria-label="Language">
+    <option value="en">English</option>
+    <option value="es">Español</option>
+    <option value="pt">Português</option>
+  </select>
+</div>
+
+<div id="language-phase" class="language-phase screening-phase">
   <div class="screening-phase__shell">
     <div class="screening-phase__card">
-      <p class="screening-phase__eyebrow">Step 1 of 3</p>
-      <h2 class="screening-phase__title">Eligibility screening</h2>
-      <p class="screening-phase__intro">
+      <p class="screening-phase__eyebrow" data-i18n="langStep">Step 1 of 4</p>
+      <h2 class="screening-phase__title" data-i18n="langTitle">Choose your language</h2>
+      <p class="screening-phase__intro" data-i18n="langIntro">
+        You can complete this study in English, Spanish, or Portuguese. Spoken or typed answers in another language will be saved and also translated into English for the research team.
+      </p>
+      <div class="language-choices">
+        <button type="button" class="language-choice-btn" data-lang="en">English</button>
+        <button type="button" class="language-choice-btn" data-lang="es">Español</button>
+        <button type="button" class="language-choice-btn" data-lang="pt">Português</button>
+      </div>
+      <div class="screening-proceed-wrap">
+        <button type="button" id="language-continue-btn" class="screening-proceed-btn" disabled aria-disabled="true" data-i18n="langContinue">
+          Continue
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="screening-phase" class="screening-phase is-hidden">
+  <div class="screening-phase__shell">
+    <div class="screening-phase__card">
+      <p class="screening-phase__eyebrow" data-i18n="step1">Step 2 of 4</p>
+      <h2 class="screening-phase__title" data-i18n="screeningTitle">Eligibility screening</h2>
+      <p class="screening-phase__intro" data-i18n="screeningIntro">
         Please answer each question honestly. Your responses determine whether you may continue to the main survey. This section uses different criteria than the questions that follow.
       </p>
       <!-- research_responses screening columns (must match js/app.js): screening_age, screening_ten_years, screening_noninjury_break, screening_pause_count, screening_current_min, screening_q3_detail_mode, screening_q4_detail_mode, screening_q3_reason, screening_q4_reason, screening_q3_audio_url, screening_q4_audio_url, q3_reason, q4_reason -->
 
       <fieldset class="screening-question">
-        <legend class="screening-question__legend">1. Are you between 18 and 85 years of age?</legend>
+        <legend class="screening-question__legend" data-i18n="screenQ1">1. Are you between 18 and 85 years of age?</legend>
         <div class="screening-question__options">
-          <label class="screening-option"><input type="radio" name="screen_age" value="yes"> Yes</label>
-          <label class="screening-option"><input type="radio" name="screen_age" value="no"> No</label>
+          <label class="screening-option"><input type="radio" name="screen_age" value="yes"> <span data-i18n="yes">Yes</span></label>
+          <label class="screening-option"><input type="radio" name="screen_age" value="no"> <span data-i18n="no">No</span></label>
         </div>
       </fieldset>
 
       <fieldset class="screening-question">
-        <legend class="screening-question__legend">
+        <legend class="screening-question__legend" data-i18n="screenQ2">
           2. Are you currently engaged in regular exercise? (Note: For this study, regular exercise is defined as an average of at least 3 days per week for a minimum of 30 minutes per session. This excludes leisure-based or very low-intensity movement.)
         </legend>
         <div class="screening-question__options">
-          <label class="screening-option"><input type="radio" name="screen_ten_years" value="yes"> Yes</label>
-          <label class="screening-option"><input type="radio" name="screen_ten_years" value="no"> No</label>
+          <label class="screening-option"><input type="radio" name="screen_ten_years" value="yes"> <span data-i18n="yes">Yes</span></label>
+          <label class="screening-option"><input type="radio" name="screen_ten_years" value="no"> <span data-i18n="no">No</span></label>
         </div>
       </fieldset>
 
       <fieldset class="screening-question">
-        <legend class="screening-question__legend">3. In the last 10 years, have you had any continuous break from training longer than 3 months for reasons <em>other than</em> injury?</legend>
+        <legend class="screening-question__legend" data-i18n-html="screenQ3">3. In the last 10 years, have you had any continuous break from training longer than 3 months for reasons <em>other than</em> injury?</legend>
         <div class="screening-question__options">
-          <label class="screening-option"><input type="radio" name="screen_noninjury_break" value="yes"> Yes</label>
-          <label class="screening-option"><input type="radio" name="screen_noninjury_break" value="no"> No</label>
+          <label class="screening-option"><input type="radio" name="screen_noninjury_break" value="yes"> <span data-i18n="yes">Yes</span></label>
+          <label class="screening-option"><input type="radio" name="screen_noninjury_break" value="no"> <span data-i18n="no">No</span></label>
         </div>
       </fieldset>
 
       <fieldset class="screening-question">
-        <legend class="screening-question__legend">4. Over the last 10 years, have you had more than 5 pauses in training lasting 3 months or more (including for injuries)?</legend>
+        <legend class="screening-question__legend" data-i18n="screenQ4">4. Over the last 10 years, have you had more than 5 pauses in training lasting 3 months or more (including for injuries)?</legend>
         <div class="screening-question__options">
-          <label class="screening-option"><input type="radio" name="screen_pause_count" value="yes"> Yes</label>
-          <label class="screening-option"><input type="radio" name="screen_pause_count" value="no"> No</label>
+          <label class="screening-option"><input type="radio" name="screen_pause_count" value="yes"> <span data-i18n="yes">Yes</span></label>
+          <label class="screening-option"><input type="radio" name="screen_pause_count" value="no"> <span data-i18n="no">No</span></label>
         </div>
       </fieldset>
 
       <fieldset class="screening-question">
-        <legend class="screening-question__legend">5. Do you currently train at least 3 days per week <em>and</em> at least 30 minutes per session on average?</legend>
+        <legend class="screening-question__legend" data-i18n-html="screenQ5">5. Do you currently train at least 3 days per week <em>and</em> at least 30 minutes per session on average?</legend>
         <div class="screening-question__options">
-          <label class="screening-option"><input type="radio" name="screen_current_min" value="yes"> Yes</label>
-          <label class="screening-option"><input type="radio" name="screen_current_min" value="no"> No</label>
+          <label class="screening-option"><input type="radio" name="screen_current_min" value="yes"> <span data-i18n="yes">Yes</span></label>
+          <label class="screening-option"><input type="radio" name="screen_current_min" value="no"> <span data-i18n="no">No</span></label>
         </div>
       </fieldset>
 
-      <div class="screening-proceed-wrap" role="region" aria-label="Continue to main survey">
-        <button type="button" id="screening-proceed-btn" class="screening-proceed-btn" disabled aria-disabled="true">
+      <div class="screening-proceed-wrap" role="region" data-i18n-aria="screeningContinueAria" aria-label="Continue to main survey">
+        <button type="button" id="screening-proceed-btn" class="screening-proceed-btn" disabled aria-disabled="true" data-i18n="continue">
           Continue
         </button>
       </div>
@@ -826,7 +935,7 @@
 
 <div id="screening-ineligible" class="screening-ineligible" aria-live="polite">
   <div class="screening-ineligible__inner">
-    <p class="screening-ineligible__text">
+    <p class="screening-ineligible__text" data-i18n="ineligible">
       Based on your responses, you do not meet the specific eligibility criteria for this study. We appreciate your time and interest!
     </p>
   </div>
@@ -835,37 +944,37 @@
 <div id="consent-phase" class="consent-phase is-hidden">
   <div class="consent-phase__shell">
     <div class="consent-phase__card">
-      <p class="screening-phase__eyebrow">Step 2 of 3</p>
-      <h2 class="screening-phase__title">Informed consent</h2>
+      <p class="screening-phase__eyebrow" data-i18n="step2">Step 3 of 4</p>
+      <h2 class="screening-phase__title" data-i18n="consentTitle">Informed consent</h2>
       <div class="consent-letter">
-        <h3>Informational Letter</h3>
-        <p class="consent-letter__study-title">Life Changes, Exercise Remains: Experiences of Long-Term Exercise Maintenance</p>
-        <p>Hello, my name is Savannah Calleja. You are being invited to take part in a research study about long-term exercise and the experiences that may help people continue exercising over time. The purpose of this study is to learn how adults who have exercised regularly for at least 10 years describe the experiences that have helped them continue exercising.</p>
-        <p>About 100 people are expected to take part in this study. Taking part will take about 30 minutes.</p>
-        <p>If you agree to take part, you will be asked to:</p>
+        <h3 data-i18n="consentH3">Informational Letter</h3>
+        <p class="consent-letter__study-title" data-i18n="consentStudyTitle">Life Changes, Exercise Remains: Experiences of Long-Term Exercise Maintenance</p>
+        <p data-i18n="consentP1">Hello, my name is Savannah Calleja. You are being invited to take part in a research study about long-term exercise and the experiences that may help people continue exercising over time. The purpose of this study is to learn how adults who have exercised regularly for at least 10 years describe the experiences that have helped them continue exercising.</p>
+        <p data-i18n="consentP2">About 100 people are expected to take part in this study. Taking part will take about 30 minutes.</p>
+        <p data-i18n="consentP3">If you agree to take part, you will be asked to:</p>
         <ul>
-          <li>Complete a short screening to see if you are eligible for the study.</li>
-          <li>Provide basic information about yourself and your exercise history, including your age, biological sex, race/ethnicity, number of years you have exercised, how often you exercise, how long your exercise sessions usually last, and your main type of exercise.</li>
-          <li>Answer five open-ended questions about your exercise experiences. These questions will ask about when you first started exercising, your reasons for exercising and how they may have changed, times when you thought about stopping exercise, difficult or intense exercise experiences, and what helped you continue exercising.</li>
-          <li>Answer the questions by typing your responses or recording audio responses through the study website. If you record your answers, the audio will be converted into written text for the research team to review and study.</li>
+          <li data-i18n="consentLi1">Complete a short screening to see if you are eligible for the study.</li>
+          <li data-i18n="consentLi2">Provide basic information about yourself and your exercise history, including your age, biological sex, race/ethnicity, number of years you have exercised, how often you exercise, how long your exercise sessions usually last, and your main type of exercise.</li>
+          <li data-i18n="consentLi3">Answer five open-ended questions about your exercise experiences. These questions will ask about when you first started exercising, your reasons for exercising and how they may have changed, times when you thought about stopping exercise, difficult or intense exercise experiences, and what helped you continue exercising.</li>
+          <li data-i18n="consentLi4">Answer the questions by typing your responses or recording audio responses through the study website. If you record your answers, the audio will be converted into written text for the research team to review and study.</li>
         </ul>
-        <p>There are minimal risks to taking part in this study. Some questions may ask you to think about difficult, intense, or discouraging exercise experiences. Thinking about these experiences may cause temporary discomfort, frustration, or tiredness. You may stop taking part at any time before submitting your responses, without penalty.</p>
-        <p>There are no guaranteed direct benefits to you for taking part in this study. However, you may find it helpful to think about your exercise experiences. This study may help researchers better understand the social, environmental, psychological, and biological factors that may help people continue exercising over many years. The results may also help guide future research and programs designed to help people continue exercising as their lives change.</p>
-        <p>There is no cost to you for taking part in this study, and you will not be paid for participating. If you have questions about the study, you may contact the research team using the contact information provided in this letter.</p>
-        <p>You will not be completely anonymous if you choose to record audio because your voice or information you share may identify you. However, your answers will be kept confidential. Your audio recordings will be stored in a protected study system and will only be available to approved members of the research team. Your audio responses will be converted into written text. Information that could identify you will be removed from the written responses before they are analyzed or shared. Your audio recordings will not be made public and will be permanently deleted after the approved storage period. Written responses with identifying information removed may be kept as required by Florida International University and the Institutional Review Board.</p>
-        <p>If you have questions for one of the researchers conducting this study, you may contact Savannah Calleja at <a href="tel:9419168459">941-916-8459</a> or <a href="mailto:scall041@fiu.edu">scall041@fiu.edu</a>.</p>
-        <p>If you would like to talk with someone about your rights of being a subject in this research study or about ethical issues with this research study, you may contact the FIU Office of Research Integrity by phone at <a href="tel:3053482494">305-348-2494</a> or by email at <a href="mailto:ori@fiu.edu">ori@fiu.edu</a>.</p>
-        <p>Your participation in this research is voluntary, and you will not be penalized or lose benefits if you refuse to participate or decide to stop. You may keep a copy of this form for your records.</p>
+        <p data-i18n="consentP4">There are minimal risks to taking part in this study. Some questions may ask you to think about difficult, intense, or discouraging exercise experiences. Thinking about these experiences may cause temporary discomfort, frustration, or tiredness. You may stop taking part at any time before submitting your responses, without penalty.</p>
+        <p data-i18n="consentP5">There are no guaranteed direct benefits to you for taking part in this study. However, you may find it helpful to think about your exercise experiences. This study may help researchers better understand the social, environmental, psychological, and biological factors that may help people continue exercising over many years. The results may also help guide future research and programs designed to help people continue exercising as their lives change.</p>
+        <p data-i18n="consentP6">There is no cost to you for taking part in this study, and you will not be paid for participating. If you have questions about the study, you may contact the research team using the contact information provided in this letter.</p>
+        <p data-i18n="consentP7">You will not be completely anonymous if you choose to record audio because your voice or information you share may identify you. However, your answers will be kept confidential. Your audio recordings will be stored in a protected study system and will only be available to approved members of the research team. Your audio responses will be converted into written text. Information that could identify you will be removed from the written responses before they are analyzed or shared. Your audio recordings will not be made public and will be permanently deleted after the approved storage period. Written responses with identifying information removed may be kept as required by Florida International University and the Institutional Review Board.</p>
+        <p data-i18n-html="consentP8">If you have questions for one of the researchers conducting this study, you may contact Savannah Calleja at <a href="tel:9419168459">941-916-8459</a> or <a href="mailto:scall041@fiu.edu">scall041@fiu.edu</a>.</p>
+        <p data-i18n-html="consentP9">If you would like to talk with someone about your rights of being a subject in this research study or about ethical issues with this research study, you may contact the FIU Office of Research Integrity by phone at <a href="tel:3053482494">305-348-2494</a> or by email at <a href="mailto:ori@fiu.edu">ori@fiu.edu</a>.</p>
+        <p data-i18n="consentP10">Your participation in this research is voluntary, and you will not be penalized or lose benefits if you refuse to participate or decide to stop. You may keep a copy of this form for your records.</p>
       </div>
       <label class="consent-agree">
         <input type="checkbox" id="consent-agree-checkbox" name="consent_agree" value="yes">
-        <span>I have read this information and I agree to take part in this research study.</span>
+        <span data-i18n="consentAgree">I have read this information and I agree to take part in this research study.</span>
       </label>
       <div class="consent-actions">
-        <button type="button" id="consent-continue-btn" class="screening-proceed-btn" disabled aria-disabled="true">
+        <button type="button" id="consent-continue-btn" class="screening-proceed-btn" disabled aria-disabled="true" data-i18n="consentContinue">
           Continue to the study
         </button>
-        <button type="button" id="consent-decline-btn" class="consent-decline-btn">
+        <button type="button" id="consent-decline-btn" class="consent-decline-btn" data-i18n="consentDecline">
           I do not agree
         </button>
       </div>
@@ -875,7 +984,7 @@
 
 <div id="consent-declined" class="consent-declined" aria-live="polite">
   <div class="screening-ineligible__inner">
-    <p class="screening-ineligible__text">
+    <p class="screening-ineligible__text" data-i18n="consentDeclined">
       You have chosen not to take part in this study. Thank you for your time.
     </p>
   </div>
@@ -883,101 +992,101 @@
 
 <div id="survey-container" class="is-hidden">
 <header>
-  <h1>Research Study</h1>
-  <p style="color:#fff;font-size:1.18em;line-height:1.35em;margin:0.2em auto 0 auto;max-width:560px;font-weight:400;">
+  <h1 data-i18n="headerTitle">Research Study</h1>
+  <p data-i18n="headerIntro" style="color:#fff;font-size:1.18em;line-height:1.35em;margin:0.2em auto 0 auto;max-width:560px;font-weight:400;">
     Thank you for participating in this survey study. Please complete the demographics, then answer each survey question in writing or by voice in as much detail as possible.
   </p>
 </header>
 <main>
   <form id="research-survey" autocomplete="off" spellcheck="true">
-    <h2>Demographics</h2>
+    <h2 data-i18n="demographics">Demographics</h2>
     <div class="demographics-grid">
       <div class="field-block">
-        <label for="age">Age</label>
+        <label for="age" data-i18n="age">Age</label>
         <input type="number" id="age" name="age" min="10" max="120" step="1" required>
       </div>
       <div class="field-block">
-        <label for="bio_sex">Biological Sex</label>
+        <label for="bio_sex" data-i18n="bioSex">Biological Sex</label>
         <select id="bio_sex" name="bio_sex" required>
-          <option value="">Select</option>
-          <option value="male">Male</option>
-          <option value="female">Female</option>
-          <option value="prefer_not_to_say">Prefer not to say</option>
+          <option value="" data-i18n="select">Select</option>
+          <option value="male" data-i18n="male">Male</option>
+          <option value="female" data-i18n="female">Female</option>
+          <option value="prefer_not_to_say" data-i18n="preferNot">Prefer not to say</option>
         </select>
       </div>
       <div class="field-block">
-        <label for="ethnicity">Ethnicity</label>
+        <label for="ethnicity" data-i18n="ethnicity">Ethnicity</label>
         <select id="ethnicity" name="ethnicity" required>
-          <option value="">Select</option>
-          <option value="hispanic_or_latino">Hispanic or Latino</option>
-          <option value="american_indian_alaska_native">American Indian or Alaska Native</option>
-          <option value="asian">Asian</option>
-          <option value="black_african_american">Black or African American</option>
-          <option value="native_hawaiian_pacific_islander">Native Hawaiian or Other Pacific Islander</option>
-          <option value="white">White</option>
+          <option value="" data-i18n="select">Select</option>
+          <option value="hispanic_or_latino" data-i18n="ethHispanic">Hispanic or Latino</option>
+          <option value="american_indian_alaska_native" data-i18n="ethAIAN">American Indian or Alaska Native</option>
+          <option value="asian" data-i18n="ethAsian">Asian</option>
+          <option value="black_african_american" data-i18n="ethBlack">Black or African American</option>
+          <option value="native_hawaiian_pacific_islander" data-i18n="ethNHPI">Native Hawaiian or Other Pacific Islander</option>
+          <option value="white" data-i18n="ethWhite">White</option>
         </select>
       </div>
       <div class="field-block">
-        <label for="years_training">Years of Training</label>
+        <label for="years_training" data-i18n="yearsTraining">Years of Training</label>
         <input type="number" id="years_training" name="years_training" min="0" max="80" step="0.1" required>
       </div>
       <div class="field-block">
-        <label for="days_per_week">Days Per Week</label>
+        <label for="days_per_week" data-i18n="daysPerWeek">Days Per Week</label>
         <input type="number" id="days_per_week" name="days_per_week" min="0" max="7" step="0.1" required>
-        <p class="field-subtext-below">In a typical week, on average, how many days do you train?</p>
+        <p class="field-subtext-below" data-i18n="daysHint">In a typical week, on average, how many days do you train?</p>
       </div>
       <div class="field-block">
-        <label for="typical_training_minutes">Typical Training Duration</label>
+        <label for="typical_training_minutes" data-i18n="duration">Typical Training Duration</label>
         <input type="number" id="typical_training_minutes" name="typical_training_minutes" min="1" max="600" step="1" required>
-        <p class="field-subtext-below">On a typical training session, how many minutes is it?</p>
+        <p class="field-subtext-below" data-i18n="durationHint">On a typical training session, how many minutes is it?</p>
       </div>
       <div class="field-block field-block--full">
-        <label for="primary_modality_select">Primary Modality</label>
+        <label for="primary_modality_select" data-i18n="modality">Primary Modality</label>
         <select id="primary_modality_select" name="primary_modality_select" required>
-          <option value="">Select</option>
-          <optgroup label="Aerobic / Endurance">
-            <option value="running">Running</option>
-            <option value="cycling">Cycling</option>
-            <option value="swimming">Swimming</option>
-            <option value="rowing">Rowing</option>
+          <option value="" data-i18n="select">Select</option>
+          <optgroup data-i18n-label="modGroupAerobic" label="Aerobic / Endurance">
+            <option value="running" data-i18n="running">Running</option>
+            <option value="cycling" data-i18n="cycling">Cycling</option>
+            <option value="swimming" data-i18n="swimming">Swimming</option>
+            <option value="rowing" data-i18n="rowing">Rowing</option>
           </optgroup>
-          <optgroup label="Resistance Training">
-            <option value="traditional_weightlifting">Traditional Weightlifting</option>
-            <option value="calisthenics">Calisthenics</option>
-            <option value="powerlifting">Powerlifting</option>
-            <option value="olympic_weightlifting">Olympic Weightlifting</option>
+          <optgroup data-i18n-label="modGroupResistance" label="Resistance Training">
+            <option value="traditional_weightlifting" data-i18n="tradLift">Traditional Weightlifting</option>
+            <option value="calisthenics" data-i18n="calisthenics">Calisthenics</option>
+            <option value="powerlifting" data-i18n="powerlifting">Powerlifting</option>
+            <option value="olympic_weightlifting" data-i18n="olyLift">Olympic Weightlifting</option>
           </optgroup>
-          <optgroup label="Functional / High-Intensity">
-            <option value="crossfit">CrossFit</option>
-            <option value="circuit_training">Circuit Training</option>
+          <optgroup data-i18n-label="modGroupFunctional" label="Functional / High-Intensity">
+            <option value="crossfit" data-i18n="crossfit">CrossFit</option>
+            <option value="circuit_training" data-i18n="circuit">Circuit Training</option>
           </optgroup>
-          <option value="other">Other (type below)</option>
+          <option value="other" data-i18n="other">Other (type below)</option>
         </select>
-        <p class="field-subtext-below">Select your main training style, or choose Other and describe it below.</p>
+        <p class="field-subtext-below" data-i18n="modalityHint">Select your main training style, or choose Other and describe it below.</p>
         <div id="primary_modality_other_wrap" class="primary-modality-other-wrap" hidden>
-          <label for="primary_modality_other" class="field-hint" style="margin-top:0.75em;">Specify your modality</label>
-          <input type="text" id="primary_modality_other" name="primary_modality_other" placeholder="e.g., Dance, sport-specific training" autocomplete="off" aria-label="Primary modality if Other">
+          <label for="primary_modality_other" class="field-hint" style="margin-top:0.75em;" data-i18n="specifyModality">Specify your modality</label>
+          <input type="text" id="primary_modality_other" name="primary_modality_other" placeholder="e.g., Dance, sport-specific training" data-i18n-placeholder="modalityPlaceholder" autocomplete="off" aria-label="Primary modality if Other">
         </div>
       </div>
     </div>
 
-    <h2>Survey Questions</h2>
-    <p class="field-hint" style="margin-bottom:1.2em;">For each question, choose <strong>either</strong> a written answer <strong>or</strong> a voice recording — not both. Please answer in as much detail as possible.</p>
+    <h2 data-i18n="surveyQuestions">Survey Questions</h2>
+    <p class="field-hint" style="margin-bottom:1.2em;" data-i18n-html="xorHint">For each question, choose <strong>either</strong> a written answer <strong>or</strong> a voice recording — not both. Please answer in as much detail as possible.</p>
     <div id="responses-section" spellcheck="true">
       <div class="response-card" data-q="1">
-        <p class="q-body">1. Tell us about the first time you started exercising. What was the initial experience like (e.g., was it intimidating, exciting, or difficult)?</p>
-        <p class="q-instruction">Please describe in as much detail as possible.</p>
+        <p class="q-body" data-i18n="q1">1. Tell us about the first time you started exercising. What was the initial experience like (e.g., was it intimidating, exciting, or difficult)?</p>
+        <p class="q-instruction" data-i18n="qInstruction">Please describe in as much detail as possible.</p>
         <fieldset class="response-mode-fieldset">
-          <legend class="response-mode-legend">Answer format (choose one)</legend>
-          <label class="response-mode-option"><input type="radio" name="response_mode_1" value="text" checked data-q="1"> Written response</label>
-          <label class="response-mode-option"><input type="radio" name="response_mode_1" value="audio" data-q="1"> Voice recording</label>
+          <legend class="response-mode-legend" data-i18n="answerFormat">Answer format (choose one)</legend>
+          <label class="response-mode-option"><input type="radio" name="response_mode_1" value="text" checked data-q="1"> <span data-i18n="written">Written response</span></label>
+          <label class="response-mode-option"><input type="radio" name="response_mode_1" value="audio" data-q="1"> <span data-i18n="voice">Voice recording</span></label>
         </fieldset>
         <div class="response-text-panel" data-q="1">
-          <textarea id="response_q1" name="response_q1" rows="4" placeholder="Type your answer here…" class="survey-response-textarea" lang="en" spellcheck="true" autocomplete="on" autocorrect="on" required></textarea>
+          <textarea id="response_q1" name="response_q1" rows="4" placeholder="Type your answer here…" data-i18n-placeholder="typeHere" class="survey-response-textarea" lang="en" spellcheck="true" autocomplete="on" autocorrect="on" required></textarea>
         </div>
         <div class="response-audio-panel" data-q="1" hidden>
           <div class="response-card-actions">
-            <button type="button" class="record-btn" data-q="1">Record answer</button>
+            <button type="button" class="record-btn" data-q="1" data-i18n="recordAnswer">Record answer</button>
             <div class="audio-controls">
               <audio controls style="display:none;" class="audio-player" data-q="1"></audio>
             </div>
@@ -986,19 +1095,19 @@
         </div>
       </div>
       <div class="response-card" data-q="2">
-        <p class="q-body">2. Why did you originally decide to start, and how has your &ldquo;why&rdquo; evolved since you&rsquo;ve started?</p>
-        <p class="q-instruction">Please describe in as much detail as possible.</p>
+        <p class="q-body" data-i18n="q2">2. Why did you originally decide to start, and how has your “why” evolved since you’ve started?</p>
+        <p class="q-instruction" data-i18n="qInstruction">Please describe in as much detail as possible.</p>
         <fieldset class="response-mode-fieldset">
-          <legend class="response-mode-legend">Answer format (choose one)</legend>
-          <label class="response-mode-option"><input type="radio" name="response_mode_2" value="text" checked data-q="2"> Written response</label>
-          <label class="response-mode-option"><input type="radio" name="response_mode_2" value="audio" data-q="2"> Voice recording</label>
+          <legend class="response-mode-legend" data-i18n="answerFormat">Answer format (choose one)</legend>
+          <label class="response-mode-option"><input type="radio" name="response_mode_2" value="text" checked data-q="2"> <span data-i18n="written">Written response</span></label>
+          <label class="response-mode-option"><input type="radio" name="response_mode_2" value="audio" data-q="2"> <span data-i18n="voice">Voice recording</span></label>
         </fieldset>
         <div class="response-text-panel" data-q="2">
-          <textarea id="response_q2" name="response_q2" rows="4" placeholder="Type your answer here…" class="survey-response-textarea" lang="en" spellcheck="true" autocomplete="on" autocorrect="on" required></textarea>
+          <textarea id="response_q2" name="response_q2" rows="4" placeholder="Type your answer here…" data-i18n-placeholder="typeHere" class="survey-response-textarea" lang="en" spellcheck="true" autocomplete="on" autocorrect="on" required></textarea>
         </div>
         <div class="response-audio-panel" data-q="2" hidden>
           <div class="response-card-actions">
-            <button type="button" class="record-btn" data-q="2">Record answer</button>
+            <button type="button" class="record-btn" data-q="2" data-i18n="recordAnswer">Record answer</button>
             <div class="audio-controls">
               <audio controls style="display:none;" class="audio-player" data-q="2"></audio>
             </div>
@@ -1007,19 +1116,19 @@
         </div>
       </div>
       <div class="response-card" data-q="3">
-        <p class="q-body">3. During your ten years or more of training, was there ever a time you wanted to give up? Please explain what kept you going and why.</p>
-        <p class="q-instruction">Please describe in as much detail as possible.</p>
+        <p class="q-body" data-i18n="q3">3. During your ten years or more of training, was there ever a time you wanted to give up? Please explain what kept you going and why.</p>
+        <p class="q-instruction" data-i18n="qInstruction">Please describe in as much detail as possible.</p>
         <fieldset class="response-mode-fieldset">
-          <legend class="response-mode-legend">Answer format (choose one)</legend>
-          <label class="response-mode-option"><input type="radio" name="response_mode_3" value="text" checked data-q="3"> Written response</label>
-          <label class="response-mode-option"><input type="radio" name="response_mode_3" value="audio" data-q="3"> Voice recording</label>
+          <legend class="response-mode-legend" data-i18n="answerFormat">Answer format (choose one)</legend>
+          <label class="response-mode-option"><input type="radio" name="response_mode_3" value="text" checked data-q="3"> <span data-i18n="written">Written response</span></label>
+          <label class="response-mode-option"><input type="radio" name="response_mode_3" value="audio" data-q="3"> <span data-i18n="voice">Voice recording</span></label>
         </fieldset>
         <div class="response-text-panel" data-q="3">
-          <textarea id="response_q3" name="response_q3" rows="4" placeholder="Type your answer here…" class="survey-response-textarea" lang="en" spellcheck="true" autocomplete="on" autocorrect="on" required></textarea>
+          <textarea id="response_q3" name="response_q3" rows="4" placeholder="Type your answer here…" data-i18n-placeholder="typeHere" class="survey-response-textarea" lang="en" spellcheck="true" autocomplete="on" autocorrect="on" required></textarea>
         </div>
         <div class="response-audio-panel" data-q="3" hidden>
           <div class="response-card-actions">
-            <button type="button" class="record-btn" data-q="3">Record answer</button>
+            <button type="button" class="record-btn" data-q="3" data-i18n="recordAnswer">Record answer</button>
             <div class="audio-controls">
               <audio controls style="display:none;" class="audio-player" data-q="3"></audio>
             </div>
@@ -1028,19 +1137,19 @@
         </div>
       </div>
       <div class="response-card" data-q="4">
-        <p class="q-body">4. Describe the hardest or most intense exercise session you&rsquo;ve ever had. How did you feel physically and mentally immediately afterward (e.g., sense of accomplishment, physical exhaustion, nausea, or mental clarity)? Please specify what the activity was (e.g., a specific race, a heavy lifting session, or a high-intensity circuit).</p>
-        <p class="q-instruction">Please describe in as much detail as possible.</p>
+        <p class="q-body" data-i18n="q4">4. Describe the hardest or most intense exercise session you’ve ever had. How did you feel physically and mentally immediately afterward (e.g., sense of accomplishment, physical exhaustion, nausea, or mental clarity)? Please specify what the activity was (e.g., a specific race, a heavy lifting session, or a high-intensity circuit).</p>
+        <p class="q-instruction" data-i18n="qInstruction">Please describe in as much detail as possible.</p>
         <fieldset class="response-mode-fieldset">
-          <legend class="response-mode-legend">Answer format (choose one)</legend>
-          <label class="response-mode-option"><input type="radio" name="response_mode_4" value="text" checked data-q="4"> Written response</label>
-          <label class="response-mode-option"><input type="radio" name="response_mode_4" value="audio" data-q="4"> Voice recording</label>
+          <legend class="response-mode-legend" data-i18n="answerFormat">Answer format (choose one)</legend>
+          <label class="response-mode-option"><input type="radio" name="response_mode_4" value="text" checked data-q="4"> <span data-i18n="written">Written response</span></label>
+          <label class="response-mode-option"><input type="radio" name="response_mode_4" value="audio" data-q="4"> <span data-i18n="voice">Voice recording</span></label>
         </fieldset>
         <div class="response-text-panel" data-q="4">
-          <textarea id="response_q4" name="response_q4" rows="4" placeholder="Type your answer here…" class="survey-response-textarea" lang="en" spellcheck="true" autocomplete="on" autocorrect="on" required></textarea>
+          <textarea id="response_q4" name="response_q4" rows="4" placeholder="Type your answer here…" data-i18n-placeholder="typeHere" class="survey-response-textarea" lang="en" spellcheck="true" autocomplete="on" autocorrect="on" required></textarea>
         </div>
         <div class="response-audio-panel" data-q="4" hidden>
           <div class="response-card-actions">
-            <button type="button" class="record-btn" data-q="4">Record answer</button>
+            <button type="button" class="record-btn" data-q="4" data-i18n="recordAnswer">Record answer</button>
             <div class="audio-controls">
               <audio controls style="display:none;" class="audio-player" data-q="4"></audio>
             </div>
@@ -1049,19 +1158,19 @@
         </div>
       </div>
       <div class="response-card" data-q="5">
-        <p class="q-body">5. Why did you choose to continue training after that specific &ldquo;hard&rdquo; session, and has that level of intensity become a regular part of your routine?</p>
-        <p class="q-instruction">Please describe in as much detail as possible.</p>
+        <p class="q-body" data-i18n="q5">5. Why did you choose to continue training after that specific “hard” session, and has that level of intensity become a regular part of your routine?</p>
+        <p class="q-instruction" data-i18n="qInstruction">Please describe in as much detail as possible.</p>
         <fieldset class="response-mode-fieldset">
-          <legend class="response-mode-legend">Answer format (choose one)</legend>
-          <label class="response-mode-option"><input type="radio" name="response_mode_5" value="text" checked data-q="5"> Written response</label>
-          <label class="response-mode-option"><input type="radio" name="response_mode_5" value="audio" data-q="5"> Voice recording</label>
+          <legend class="response-mode-legend" data-i18n="answerFormat">Answer format (choose one)</legend>
+          <label class="response-mode-option"><input type="radio" name="response_mode_5" value="text" checked data-q="5"> <span data-i18n="written">Written response</span></label>
+          <label class="response-mode-option"><input type="radio" name="response_mode_5" value="audio" data-q="5"> <span data-i18n="voice">Voice recording</span></label>
         </fieldset>
         <div class="response-text-panel" data-q="5">
-          <textarea id="response_q5" name="response_q5" rows="4" placeholder="Type your answer here…" class="survey-response-textarea" lang="en" spellcheck="true" autocomplete="on" autocorrect="on" required></textarea>
+          <textarea id="response_q5" name="response_q5" rows="4" placeholder="Type your answer here…" data-i18n-placeholder="typeHere" class="survey-response-textarea" lang="en" spellcheck="true" autocomplete="on" autocorrect="on" required></textarea>
         </div>
         <div class="response-audio-panel" data-q="5" hidden>
           <div class="response-card-actions">
-            <button type="button" class="record-btn" data-q="5">Record answer</button>
+            <button type="button" class="record-btn" data-q="5" data-i18n="recordAnswer">Record answer</button>
             <div class="audio-controls">
               <audio controls style="display:none;" class="audio-player" data-q="5"></audio>
             </div>
@@ -1070,7 +1179,7 @@
         </div>
       </div>
     </div>
-    <button type="submit" class="submit-btn">Submit Survey</button>
+    <button type="submit" class="submit-btn" data-i18n="submit">Submit Survey</button>
     <div id="feedback" class="success-message" style="display:none;"></div>
     <div id="error" class="error-message" style="display:none;"></div>
   </form>
@@ -1079,12 +1188,13 @@
 
 <div id="success-screen" class="success-screen" role="status" aria-live="polite">
   <div class="success-screen__inner">
-    <h1 class="success-screen__title">Thank you</h1>
-    <p class="success-screen__note">Your responses have been saved. We appreciate your participation in this study.</p>
+    <h1 class="success-screen__title" data-i18n="thankYou">Thank you</h1>
+    <p class="success-screen__note" data-i18n="thankYouNote">Your responses have been saved. We appreciate your participation in this study.</p>
   </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="js/app.js?v=35"></script>
+<script src="js/i18n.js?v=2"></script>
+<script src="js/app.js?v=36"></script>
 </body>
 </html>

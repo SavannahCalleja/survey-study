@@ -1,7 +1,8 @@
 /**
- * Database Webhook on `research_responses` (INSERT or UPDATE): transcribe audio URLs on the row.
- * - `q1_audio_url`..`q5_audio_url` → `trans_q1`..`trans_q5` (main survey)
- * - `screening_q3_audio_url` → `screening_q3_reason`, `screening_q4_audio_url` → `screening_q4_reason` (eligibility voice)
+ * Database Webhook on `research_responses` (INSERT or UPDATE):
+ * - Audio URLs (`q*_audio_url`, screening audio) → English text via Whisper `/v1/audio/translations`
+ * - Typed answers (`text_q1`…`text_q5`) with no audio → English in `trans_q*` via GPT
+ * Original typed text stays in `text_q*`; original audio stays in Storage.
  */
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 
@@ -64,16 +65,16 @@ Deno.serve(async (req) => {
 
     const oldRecord = extractOldRecordFromWebhook(parsed);
 
-    const jobs = collectTranscriptionJobs(record, oldRecord);
+    const jobs = collectTranslationJobs(record, oldRecord);
     if (jobs.length === 0) {
       console.log(
-        `[transcribe-audio] Skip row=${idStr}: no new/changed q1_audio_url..q5_audio_url, screening_q3_audio_url, or screening_q4_audio_url`
+        `[transcribe-audio] Skip row=${idStr}: no new/changed audio URLs or typed answers to translate`
       );
       return json({
         ok: true,
-        skipped: "no_new_or_changed_audio_urls",
+        skipped: "no_new_or_changed_content",
         message:
-          "Nothing to transcribe: no new/changed q*_audio_url, screening_q3_audio_url, or screening_q4_audio_url.",
+          "Nothing to translate: no new/changed q*_audio_url, screening audio URLs, or text_q* answers.",
       });
     }
 
@@ -101,24 +102,33 @@ Deno.serve(async (req) => {
 
     const updatePayload: Record<string, string> = {};
 
-    for (const { dbColumn: destColumn, url: raw } of jobs) {
-      const fullUrl = resolveFullPublicAudioUrl(raw, supabaseUrl);
-      console.log(
-        `[transcribe-audio] Whisper start row=${idStr} dest=${destColumn} resolvedUrl=${fullUrl.slice(0, 120)}${fullUrl.length > 120 ? "…" : ""}`
-      );
+    for (const job of jobs) {
+      const destColumn = job.dbColumn;
       try {
-        const transcript = await transcribeAudioUrl(fullUrl, openaiKey, `row=${idStr} dest=${destColumn}`);
-        if (typeof transcript !== "string") {
-          throw new Error(`Whisper returned non-string for ${destColumn}: ${typeof transcript}`);
+        let english = "";
+        if (job.kind === "audio") {
+          const fullUrl = resolveFullPublicAudioUrl(job.url, supabaseUrl);
+          console.log(
+            `[transcribe-audio] Whisper EN start row=${idStr} dest=${destColumn} resolvedUrl=${fullUrl.slice(0, 120)}${fullUrl.length > 120 ? "…" : ""}`
+          );
+          english = await translateAudioUrlToEnglish(fullUrl, openaiKey, `row=${idStr} dest=${destColumn}`);
+        } else {
+          console.log(
+            `[transcribe-audio] Text EN start row=${idStr} dest=${destColumn} chars=${job.text.length}`
+          );
+          english = await translateTextToEnglish(job.text, openaiKey, `row=${idStr} dest=${destColumn}`);
         }
-        updatePayload[destColumn] = transcript;
+        if (typeof english !== "string") {
+          throw new Error(`Translation returned non-string for ${destColumn}: ${typeof english}`);
+        }
+        updatePayload[destColumn] = english;
         console.log(
-          `[transcribe-audio] Whisper ok row=${idStr} dest=${destColumn} chars=${transcript.length}`
+          `[transcribe-audio] EN ok row=${idStr} dest=${destColumn} chars=${english.length}`
         );
       } catch (jobErr) {
         const msg = jobErr instanceof Error ? jobErr.message : String(jobErr);
         const stack = jobErr instanceof Error ? jobErr.stack : undefined;
-        console.error(`[transcribe-audio] Whisper FAILED row=${idStr} dest=${destColumn}: ${msg}`, stack ?? "");
+        console.error(`[transcribe-audio] EN FAILED row=${idStr} dest=${destColumn}: ${msg}`, stack ?? "");
         throw jobErr;
       }
     }
@@ -143,7 +153,7 @@ Deno.serve(async (req) => {
     }
 
     console.log("Update successful");
-    return json({ ok: true, transcribed: Object.keys(updatePayload) });
+    return json({ ok: true, translated: Object.keys(updatePayload) });
   } catch (e) {
     const message = e instanceof Error ? e.message : String(e);
     const stack = e instanceof Error ? e.stack : undefined;
@@ -236,44 +246,51 @@ function extractOldRecordFromWebhook(parsed: Record<string, unknown>): Record<st
   return null;
 }
 
+type TranslationJob =
+  | { kind: "audio"; dbColumn: string; url: string }
+  | { kind: "text"; dbColumn: string; text: string };
+
 /**
- * INSERT: transcribe every non-empty audio URL on the row.
- * UPDATE: only when a watched URL changed vs `oldRecord` (second screening clip, final survey audio, etc.).
+ * INSERT: translate every new audio URL and every typed answer that has no audio.
+ * UPDATE: only when a watched field changed vs `oldRecord`.
+ * Audio wins over typed text for the same question (XOR on the form).
  */
-function collectTranscriptionJobs(
+function collectTranslationJobs(
   record: Record<string, unknown>,
   oldRecord: Record<string, unknown> | null
-): { dbColumn: string; url: string }[] {
-  const jobs: { dbColumn: string; url: string }[] = [];
+): TranslationJob[] {
+  const jobs: TranslationJob[] = [];
 
-  const urlChanged = (key: string): boolean => {
-    const u = record[key];
-    if (typeof u !== "string" || !u.trim()) return false;
+  const asTrimmed = (value: unknown): string => (typeof value === "string" ? value.trim() : "");
+
+  const fieldChanged = (key: string): boolean => {
     if (!oldRecord) return true;
-    return oldRecord[key] !== u;
+    return oldRecord[key] !== record[key];
   };
 
   for (let q = 1; q <= 5; q++) {
-    const uk = `q${q}_audio_url`;
-    if (urlChanged(uk)) {
-      const u = record[uk];
-      if (typeof u === "string" && u.trim()) {
-        jobs.push({ dbColumn: `trans_q${q}`, url: u.trim() });
-      }
+    const urlKey = `q${q}_audio_url`;
+    const textKey = `text_q${q}`;
+    const dest = `trans_q${q}`;
+    const audioUrl = asTrimmed(record[urlKey]);
+    const typed = asTrimmed(record[textKey]);
+
+    if (audioUrl && fieldChanged(urlKey)) {
+      jobs.push({ kind: "audio", dbColumn: dest, url: audioUrl });
+      continue;
+    }
+    if (!audioUrl && typed && fieldChanged(textKey)) {
+      jobs.push({ kind: "text", dbColumn: dest, text: typed });
     }
   }
 
-  if (urlChanged("screening_q3_audio_url")) {
-    const u = record["screening_q3_audio_url"];
-    if (typeof u === "string" && u.trim()) {
-      jobs.push({ dbColumn: "screening_q3_reason", url: u.trim() });
-    }
+  if (fieldChanged("screening_q3_audio_url")) {
+    const u = asTrimmed(record["screening_q3_audio_url"]);
+    if (u) jobs.push({ kind: "audio", dbColumn: "screening_q3_reason", url: u });
   }
-  if (urlChanged("screening_q4_audio_url")) {
-    const u = record["screening_q4_audio_url"];
-    if (typeof u === "string" && u.trim()) {
-      jobs.push({ dbColumn: "screening_q4_reason", url: u.trim() });
-    }
+  if (fieldChanged("screening_q4_audio_url")) {
+    const u = asTrimmed(record["screening_q4_audio_url"]);
+    if (u) jobs.push({ kind: "audio", dbColumn: "screening_q4_reason", url: u });
   }
 
   return jobs;
@@ -306,7 +323,57 @@ function json(data: Record<string, unknown>, status = 200) {
   });
 }
 
-async function transcribeAudioUrl(audioUrl: string, apiKey: string, context: string): Promise<string> {
+async function translateTextToEnglish(text: string, apiKey: string, context: string): Promise<string> {
+  const trimmed = text.trim();
+  if (!trimmed) return "";
+
+  let res: Response;
+  try {
+    res = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "gpt-4o-mini",
+        temperature: 0,
+        messages: [
+          {
+            role: "system",
+            content:
+              "Translate the user's message into English. If it is already English, return it unchanged. Preserve meaning, paragraph breaks, and first-person voice. Return only the translation with no quotes or commentary.",
+          },
+          { role: "user", content: trimmed },
+        ],
+      }),
+    });
+  } catch (fetchErr) {
+    const m = fetchErr instanceof Error ? fetchErr.message : String(fetchErr);
+    console.error(`[transcribe-audio] GPT request network error (${context}):`, m, fetchErr);
+    throw fetchErr;
+  }
+
+  if (!res.ok) {
+    let errText = "";
+    try {
+      errText = await res.text();
+    } catch {
+      errText = "(unreadable)";
+    }
+    const msg = `OpenAI translation failed (${context}) HTTP ${res.status}: ${errText.slice(0, 2000)}`;
+    console.error(`[transcribe-audio] ${msg}`);
+    throw new Error(msg);
+  }
+
+  const body = (await res.json()) as {
+    choices?: Array<{ message?: { content?: string } }>;
+  };
+  const content = body.choices?.[0]?.message?.content;
+  return typeof content === "string" ? content.trim() : "";
+}
+
+async function translateAudioUrlToEnglish(audioUrl: string, apiKey: string, context: string): Promise<string> {
   let res: Response;
   try {
     res = await fetch(audioUrl);
@@ -344,7 +411,7 @@ async function transcribeAudioUrl(audioUrl: string, apiKey: string, context: str
 
   let tr: Response;
   try {
-    tr = await fetch("https://api.openai.com/v1/audio/transcriptions", {
+    tr = await fetch("https://api.openai.com/v1/audio/translations", {
       method: "POST",
       headers: {
         Authorization: `Bearer ${apiKey}`,
@@ -380,14 +447,14 @@ async function transcribeAudioUrl(audioUrl: string, apiKey: string, context: str
 
   if (!openAiResponse || typeof openAiResponse !== "object") {
     console.error(`[transcribe-audio] OpenAI response not an object (${context}):`, openAiResponse);
-    throw new Error(`OpenAI transcription response was not a JSON object (${context})`);
+    throw new Error(`OpenAI translation response was not a JSON object (${context})`);
   }
 
   const body = openAiResponse as Record<string, unknown>;
   const rawText = body["text"];
   if (rawText !== undefined && typeof rawText !== "string") {
     console.error(`[transcribe-audio] OpenAI 'text' field has wrong type (${context}):`, typeof rawText, body);
-    throw new Error(`OpenAI transcription 'text' was not a string (${context})`);
+    throw new Error(`OpenAI translation 'text' was not a string (${context})`);
   }
 
   const transcript = typeof rawText === "string" ? rawText.trim() : "";

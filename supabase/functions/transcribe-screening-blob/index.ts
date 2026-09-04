@@ -1,6 +1,6 @@
 /**
  * Invoked from the browser after eligibility screening voice clips (multipart FormData `file`).
- * Uses OpenAI Whisper — same as webhook-based transcribe-audio, but for raw uploads.
+ * Uses OpenAI Whisper translations — same as webhook-based transcribe-audio, but for raw uploads.
  */
 const corsHeaders: Record<string, string> = {
   "Access-Control-Allow-Origin": "*",
@@ -41,7 +41,7 @@ Deno.serve(async (req) => {
 
   let tr: Response;
   try {
-    tr = await fetch("https://api.openai.com/v1/audio/transcriptions", {
+    tr = await fetch("https://api.openai.com/v1/audio/translations", {
       method: "POST",
       headers: { Authorization: `Bearer ${openaiKey}` },
       body: out,

@@ -125,6 +125,33 @@ function storageContentTypeForBlob(blob) {
 const SCREENING_PASS_STORAGE_KEY = 'research_survey_screening_passed';
 /** Set when the participant agrees to the informed consent letter. */
 const CONSENT_PASS_STORAGE_KEY = 'research_survey_consent_agreed';
+/** Set after they confirm a UI language and leave the language picker. */
+const LANGUAGE_CHOSEN_STORAGE_KEY = 'research_survey_language_chosen';
+
+function uiT(key) {
+  if (window.SurveyI18n && typeof window.SurveyI18n.t === 'function') {
+    return window.SurveyI18n.t(key);
+  }
+  return key;
+}
+
+function applyUiLanguage() {
+  if (window.SurveyI18n && typeof window.SurveyI18n.apply === 'function') {
+    window.SurveyI18n.apply();
+  }
+}
+
+function getSurveyLanguage() {
+  if (window.SurveyI18n && typeof window.SurveyI18n.getLang === 'function') {
+    return window.SurveyI18n.getLang();
+  }
+  return 'en';
+}
+
+function showLangSwitcher() {
+  var el = document.getElementById('lang-switch');
+  if (el) el.classList.add('is-visible');
+}
 
 function initSupabase() {
   if (!window.supabase || typeof window.supabase.createClient !== 'function') {
@@ -190,11 +217,11 @@ function setMainSurveyUploadStatus(q, kind) {
   el.className = 'main-survey-audio-status';
   if (kind === 'uploading') {
     el.classList.add('main-survey-audio-status--uploading');
-    el.textContent = 'Uploading…';
+    el.textContent = uiT('uploading');
     el.hidden = false;
   } else if (kind === 'saved') {
     el.classList.add('main-survey-audio-status--saved');
-    el.textContent = 'Saved';
+    el.textContent = uiT('saved');
     el.hidden = false;
   } else {
     el.textContent = '';
@@ -205,7 +232,7 @@ function setMainSurveyUploadStatus(q, kind) {
 /** Uploads to Storage only; stores public URL on `mainSurveyUploadedAudioUrls[qNum]` for submitSurvey. */
 function runMainSurveyUploadAfterStop(qNum, blob) {
   if (!supabaseClient) {
-    showError('Survey is not connected. Check Supabase settings in js/app.js.');
+    showError(uiT('errNotConnected'));
     return;
   }
   setMainSurveyUploadStatus(qNum, 'uploading');
@@ -218,7 +245,7 @@ function runMainSurveyUploadAfterStop(qNum, blob) {
       console.error('[Main survey] audio upload:', err);
       mainSurveyUploadedAudioUrls[qNum] = '';
       setMainSurveyUploadStatus(qNum, 'clear');
-      showError('Could not upload your recording. Please try recording again.');
+      showError(uiT('errUpload'));
     });
 }
 
@@ -311,14 +338,14 @@ function setRecordButtonIdle(q) {
   const btn = document.querySelector('.record-btn[data-q="' + q + '"]');
   if (!btn) return;
   btn.classList.remove('recording');
-  btn.textContent = 'Record answer';
+  btn.textContent = uiT('recordAnswer');
 }
 
 function setRecordButtonActive(q) {
   const btn = document.querySelector('.record-btn[data-q="' + q + '"]');
   if (!btn) return;
   btn.classList.add('recording');
-  btn.textContent = 'Recording... Tap to Stop';
+  btn.textContent = uiT('recordingStop');
   mainSurveyUploadedAudioUrls[q] = '';
   setMainSurveyUploadStatus(q, 'clear');
 }
@@ -326,7 +353,7 @@ function setRecordButtonActive(q) {
 function resetAllRecordButtons() {
   document.querySelectorAll('.record-btn[data-q]').forEach(function (b) {
     b.classList.remove('recording');
-    b.textContent = 'Record answer';
+    b.textContent = uiT('recordAnswer');
   });
   applyRecordingLock(null, false);
 }
@@ -349,12 +376,14 @@ function showSubmissionSuccessView() {
   } catch (e) {}
   const survey = document.getElementById('survey-container');
   const success = document.getElementById('success-screen');
+  const langPhase = document.getElementById('language-phase');
   const phase = document.getElementById('screening-phase');
   const consent = document.getElementById('consent-phase');
   const ineligible = document.getElementById('screening-ineligible');
   const declined = document.getElementById('consent-declined');
   if (survey) survey.classList.add('is-hidden');
   if (success) success.classList.add('is-visible');
+  if (langPhase) langPhase.classList.add('is-hidden');
   if (phase) phase.classList.add('is-hidden');
   if (consent) consent.classList.add('is-hidden');
   if (ineligible) ineligible.classList.remove('is-visible');
@@ -519,6 +548,7 @@ async function persistScreeningScreenout() {
   try {
     const extras = await buildScreeningRowExtras();
     const row = Object.assign({}, extras, {
+      survey_language: getSurveyLanguage(),
       submitted_at: new Date().toISOString(),
     });
     let draftId = null;
@@ -546,11 +576,13 @@ async function showScreeningIneligible() {
     sessionStorage.removeItem(SCREENING_PASS_STORAGE_KEY);
     sessionStorage.removeItem(CONSENT_PASS_STORAGE_KEY);
   } catch (e) {}
+  const langPhase = document.getElementById('language-phase');
   const phase = document.getElementById('screening-phase');
   const consent = document.getElementById('consent-phase');
   const survey = document.getElementById('survey-container');
   const bad = document.getElementById('screening-ineligible');
   const declined = document.getElementById('consent-declined');
+  if (langPhase) langPhase.classList.add('is-hidden');
   if (phase) phase.classList.add('is-hidden');
   if (consent) consent.classList.add('is-hidden');
   if (survey) survey.classList.add('is-hidden');
@@ -565,11 +597,13 @@ function showConsentAfterScreening() {
     sessionStorage.setItem(SCREENING_PASS_STORAGE_KEY, '1');
     sessionStorage.removeItem(CONSENT_PASS_STORAGE_KEY);
   } catch (e) {}
+  const langPhase = document.getElementById('language-phase');
   const phase = document.getElementById('screening-phase');
   const consent = document.getElementById('consent-phase');
   const survey = document.getElementById('survey-container');
   const bad = document.getElementById('screening-ineligible');
   const declined = document.getElementById('consent-declined');
+  if (langPhase) langPhase.classList.add('is-hidden');
   if (phase) phase.classList.add('is-hidden');
   if (consent) consent.classList.remove('is-hidden');
   if (survey) survey.classList.add('is-hidden');
@@ -585,9 +619,13 @@ function showSurveyAfterConsent() {
   try {
     sessionStorage.setItem(CONSENT_PASS_STORAGE_KEY, '1');
   } catch (e) {}
+  const langPhase = document.getElementById('language-phase');
+  const phase = document.getElementById('screening-phase');
   const consent = document.getElementById('consent-phase');
   const survey = document.getElementById('survey-container');
   const declined = document.getElementById('consent-declined');
+  if (langPhase) langPhase.classList.add('is-hidden');
+  if (phase) phase.classList.add('is-hidden');
   if (consent) consent.classList.add('is-hidden');
   if (survey) survey.classList.remove('is-hidden');
   if (declined) declined.classList.remove('is-visible');
@@ -598,10 +636,12 @@ function showConsentDeclined() {
   try {
     sessionStorage.removeItem(CONSENT_PASS_STORAGE_KEY);
   } catch (e) {}
+  const langPhase = document.getElementById('language-phase');
   const phase = document.getElementById('screening-phase');
   const consent = document.getElementById('consent-phase');
   const survey = document.getElementById('survey-container');
   const declined = document.getElementById('consent-declined');
+  if (langPhase) langPhase.classList.add('is-hidden');
   if (phase) phase.classList.add('is-hidden');
   if (consent) consent.classList.add('is-hidden');
   if (survey) survey.classList.add('is-hidden');
@@ -746,7 +786,7 @@ async function submitSurvey(ev) {
   ev.preventDefault();
 
   if (!supabaseClient) {
-    showError('Survey is not connected. Check Supabase settings in js/app.js.');
+    showError(uiT('errNotConnected'));
     return;
   }
 
@@ -755,7 +795,7 @@ async function submitSurvey(ev) {
     screeningPassed = sessionStorage.getItem(SCREENING_PASS_STORAGE_KEY) === '1';
   } catch (e) {}
   if (!screeningPassed) {
-    showError('You must complete the eligibility screening and qualify before you can submit this survey.');
+    showError(uiT('errScreening'));
     return;
   }
 
@@ -764,7 +804,7 @@ async function submitSurvey(ev) {
     consentPassed = sessionStorage.getItem(CONSENT_PASS_STORAGE_KEY) === '1';
   } catch (e) {}
   if (!consentPassed) {
-    showError('You must read and agree to the informed consent information before you can submit this survey.');
+    showError(uiT('errConsent'));
     return;
   }
 
@@ -782,7 +822,7 @@ async function submitSurvey(ev) {
   if (modalitySelectVal === 'other') {
     primaryModalityValue = document.getElementById('primary_modality_other').value.trim();
     if (!primaryModalityValue) {
-      showError('Please specify your primary modality when you select Other.');
+      showError(uiT('errOtherModality'));
       submitBtn.disabled = false;
       return;
     }
@@ -805,22 +845,20 @@ async function submitSurvey(ev) {
     const text = getResponseText(qi);
     const hasAudio = !!recordedBlobs['q' + qi];
     if (mode === 'text') {
-      if (!text) missing.push('Q' + qi + ' (written answer)');
+      if (!text) missing.push('Q' + qi + ' (' + uiT('writtenAnswer') + ')');
       if (hasAudio) mixed.push('Q' + qi);
     } else {
-      if (!hasAudio) missing.push('Q' + qi + ' (voice recording)');
+      if (!hasAudio) missing.push('Q' + qi + ' (' + uiT('voiceRecording') + ')');
       if (text) mixed.push('Q' + qi);
     }
   }
   if (mixed.length) {
-    showError(
-      'Each question must be answered with either writing or voice only — please fix: ' + mixed.join(', ')
-    );
+    showError(uiT('errMixedPrefix') + mixed.join(', '));
     submitBtn.disabled = false;
     return;
   }
   if (missing.length) {
-    showError('Please complete every question: ' + missing.join('; '));
+    showError(uiT('errMissingPrefix') + missing.join('; '));
     submitBtn.disabled = false;
     return;
   }
@@ -829,7 +867,7 @@ async function submitSurvey(ev) {
   const qAudioUrls = { 1: '', 2: '', 3: '', 4: '', 5: '' };
 
   const submitLabelDefault = submitBtn.textContent;
-  submitBtn.textContent = 'Submitting…';
+  submitBtn.textContent = uiT('submitting');
 
   let screeningExtras;
   try {
@@ -854,7 +892,7 @@ async function submitSurvey(ev) {
   } catch (err) {
     console.error('[Supabase storage] upload exception:', err);
     const msg = err && err.message ? err.message : String(err);
-    showError('Audio upload failed: ' + msg);
+    showError(uiT('errAudioUploadPrefix') + msg);
     submitBtn.disabled = false;
     submitBtn.textContent = submitLabelDefault;
     return;
@@ -885,6 +923,7 @@ async function submitSurvey(ev) {
     q3_audio_url: String(qAudioUrls[3] || mainSurveyUploadedAudioUrls[3] || '').trim(),
     q4_audio_url: String(qAudioUrls[4] || mainSurveyUploadedAudioUrls[4] || '').trim(),
     q5_audio_url: String(qAudioUrls[5] || mainSurveyUploadedAudioUrls[5] || '').trim(),
+    survey_language: getSurveyLanguage(),
     submitted_at: new Date().toISOString(),
   });
 
@@ -903,6 +942,19 @@ async function submitSurvey(ev) {
   }
 
   if (error) {
+    var errMsg = (error.message || '') + '';
+    if (/survey_language/i.test(errMsg)) {
+      console.warn('[Supabase] survey_language column missing; retrying without it');
+      delete row.survey_language;
+      if (draftRowId) {
+        error = (await supabaseClient.from('research_responses').update(row).eq('id', draftRowId)).error;
+      } else {
+        error = (await supabaseClient.from('research_responses').insert([row])).error;
+      }
+    }
+  }
+
+  if (error) {
     console.error('[Supabase] save research_responses failed:', error, {
       message: error.message,
       details: error.details,
@@ -911,7 +963,7 @@ async function submitSurvey(ev) {
       payloadKeys: Object.keys(row),
       draftRowId: draftRowId,
     });
-    showError('Submission error: ' + (error.message || error));
+    showError(uiT('errSubmitPrefix') + (error.message || error));
     submitBtn.disabled = false;
     submitBtn.textContent = submitLabelDefault;
     return;
@@ -947,6 +999,105 @@ function bindScreeningProceedButton() {
     if (!canProceedFromScreening()) return;
     showConsentAfterScreening();
   });
+}
+
+function markLanguageChosen() {
+  try {
+    sessionStorage.setItem(LANGUAGE_CHOSEN_STORAGE_KEY, '1');
+  } catch (e) {}
+}
+
+function showScreeningAfterLanguage() {
+  markLanguageChosen();
+  showLangSwitcher();
+  var langPhase = document.getElementById('language-phase');
+  var screening = document.getElementById('screening-phase');
+  if (langPhase) langPhase.classList.add('is-hidden');
+  if (screening) screening.classList.remove('is-hidden');
+  applyUiLanguage();
+  window.scrollTo(0, 0);
+}
+
+function bindLanguagePhase() {
+  var continueBtn = document.getElementById('language-continue-btn');
+  document.querySelectorAll('.language-choice-btn').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var code = btn.getAttribute('data-lang') || 'en';
+      document.querySelectorAll('.language-choice-btn').forEach(function (b) {
+        b.classList.toggle('is-selected', b === btn);
+      });
+      if (window.SurveyI18n) window.SurveyI18n.setLang(code);
+      if (continueBtn) {
+        continueBtn.removeAttribute('disabled');
+        continueBtn.setAttribute('aria-disabled', 'false');
+      }
+    });
+  });
+  if (continueBtn) {
+    continueBtn.addEventListener('click', function () {
+      if (continueBtn.getAttribute('aria-disabled') === 'true') return;
+      showScreeningAfterLanguage();
+    });
+  }
+  var switcher = document.getElementById('lang-switch-select');
+  if (switcher) {
+    switcher.addEventListener('change', function () {
+      if (window.SurveyI18n) window.SurveyI18n.setLang(switcher.value);
+    });
+  }
+}
+
+function restoreStudyPhase() {
+  var langChosen = false;
+  var screeningPassed = false;
+  var consentPassed = false;
+  try {
+    langChosen = sessionStorage.getItem(LANGUAGE_CHOSEN_STORAGE_KEY) === '1';
+    screeningPassed = sessionStorage.getItem(SCREENING_PASS_STORAGE_KEY) === '1';
+    consentPassed = sessionStorage.getItem(CONSENT_PASS_STORAGE_KEY) === '1';
+  } catch (e) {}
+
+  if (!langChosen) {
+    try {
+      sessionStorage.removeItem(SCREENING_PASS_STORAGE_KEY);
+      sessionStorage.removeItem(CONSENT_PASS_STORAGE_KEY);
+    } catch (e) {}
+    applyUiLanguage();
+    return;
+  }
+
+  showLangSwitcher();
+  var langPhase = document.getElementById('language-phase');
+  if (langPhase) langPhase.classList.add('is-hidden');
+
+  var current = getSurveyLanguage();
+  document.querySelectorAll('.language-choice-btn').forEach(function (b) {
+    b.classList.toggle('is-selected', b.getAttribute('data-lang') === current);
+  });
+  var continueBtn = document.getElementById('language-continue-btn');
+  if (continueBtn) {
+    continueBtn.removeAttribute('disabled');
+    continueBtn.setAttribute('aria-disabled', 'false');
+  }
+
+  if (consentPassed) {
+    var screeningDone = document.getElementById('screening-phase');
+    var consentDone = document.getElementById('consent-phase');
+    var survey = document.getElementById('survey-container');
+    if (screeningDone) screeningDone.classList.add('is-hidden');
+    if (consentDone) consentDone.classList.add('is-hidden');
+    if (survey) survey.classList.remove('is-hidden');
+  } else if (screeningPassed) {
+    var screeningEl = document.getElementById('screening-phase');
+    var consentEl = document.getElementById('consent-phase');
+    if (screeningEl) screeningEl.classList.add('is-hidden');
+    if (consentEl) consentEl.classList.remove('is-hidden');
+    updateConsentContinueButton();
+  } else {
+    var screeningStart = document.getElementById('screening-phase');
+    if (screeningStart) screeningStart.classList.remove('is-hidden');
+  }
+  applyUiLanguage();
 }
 
 function bindRecordButtons() {
@@ -985,7 +1136,7 @@ function bindRecordButtons() {
           recorder.start();
         } catch (err) {
           console.error('[Recording]', err);
-          showError('Microphone permission needed to record. Please allow mic access.');
+          showError(uiT('errMic'));
           setRecordButtonIdle(qNum);
           applyRecordingLock(null, false);
           currentRecordingQ = null;
@@ -1004,13 +1155,10 @@ function bindRecordButtons() {
 
 function boot() {
   initSupabase();
-  const screeningPhaseEl = document.getElementById('screening-phase');
-  if (screeningPhaseEl && !screeningPhaseEl.classList.contains('is-hidden')) {
-    try {
-      sessionStorage.removeItem(SCREENING_PASS_STORAGE_KEY);
-      sessionStorage.removeItem(CONSENT_PASS_STORAGE_KEY);
-    } catch (e) {}
+  if (window.SurveyI18n && typeof window.SurveyI18n.initFromStorage === 'function') {
+    window.SurveyI18n.initFromStorage();
   }
+  bindLanguagePhase();
   bindScreeningRadios();
   bindScreeningProceedButton();
   updateScreeningProceedButton();
@@ -1023,6 +1171,7 @@ function boot() {
   bindResponseModeRadios();
   bindRecordButtons();
   initResponseModes();
+  restoreStudyPhase();
 }
 
 window.submitSurvey = submitSurvey;
