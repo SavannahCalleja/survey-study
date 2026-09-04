@@ -5,37 +5,62 @@ Principal Investigator: Dr. Marcelo Bigliassi
 Institution: Florida International University (FIU)  
 Lab: Psychophysiology and Exercise Science Lab  
 
+Instrument: https://savannahcalleja.github.io/survey-study/
+
 ---
 
 ## Project Overview
-This research investigates the psychological and physiological factors driving long-term exercise adherence. By engaging a cohort with a minimum of ten years of consistent training, this study maps the longitudinal journey from a participant's inception in exercise to their most intense physical milestones.
+This research investigates the psychological and physiological factors driving long-term exercise adherence. The digital instrument maps a participant's journey from their first training experience through later motivational change, resilience, peak intensity, and the integration of hard training into a regular routine.
 
-Utilizing a custom-built, dual-modality digital instrument, this system empowers participants to provide narratives through either written text or high-fidelity voice recording, ensuring granular data capture of the athletic developmental trajectory.
+Participants provide narratives through either written text or voice recording (one modality per prompt), so each response is captured in a single, high-fidelity format.
 
 ---
 
 ## Participant Eligibility
-To maintain the integrity of the qualitative cohort, participants must meet the following criteria:
-* Training Age: Minimum of 10 years of consistent physical training.
-* Current Activity: Active engagement in training at least 3 days per week (minimum 30 minutes per session).
-* Format: Ability to provide detailed narratives (2-3 sentences per prompt) via text or audio.
+Eligibility is determined by five Yes/No screening questions. Participants continue to the main survey only if they meet all of the following:
+
+Inclusion (must answer Yes):
+* Age between 18 and 85 years.
+* Currently engaged in regular exercise, defined as an average of at least 3 days per week for a minimum of 30 minutes per session, excluding leisure-based or very low-intensity movement.
+* Currently train at least 3 days per week and at least 30 minutes per session on average.
+
+Exclusion (must answer No):
+* In the last 10 years, any continuous break from training longer than 3 months for reasons other than injury.
+* Over the last 10 years, more than 5 pauses in training lasting 3 months or more (including for injuries).
+
+Participants who do not meet these criteria are thanked and are not shown the main survey.
+
+---
+
+## Demographics
+Eligible participants report:
+* Age
+* Biological sex
+* Ethnicity
+* Years of training
+* Typical training days per week
+* Typical session duration (minutes)
+* Primary training modality
+
+Height and current weight are not collected.
 
 ---
 
 ## Narrative Prompts
-Participants navigate through five retrospective prompts designed to capture critical emotional milestones:
-1. The Inception: Recounting the very first experience with exercise.
-2. The Evolution of Why: How the why has shifted over a decade.
-3. Resilience: Factors preventing attrition during moments of peak fatigue.
-4. Peak Intensity: Reflections on the most physically intense session ever recorded.
-5. Normalization: The integration of high-intensity training into a regular routine.
+Participants answer five retrospective prompts. Each prompt must be completed as either a written response or a voice recording, not both.
+
+1. The Inception: The first time they started exercising, and whether that initial experience was intimidating, exciting, or difficult.
+2. The Evolution of Why: Why they originally decided to start, and how that why has evolved since they began.
+3. Resilience: Whether there was a time they wanted to give up during ten or more years of training, what kept them going, and why.
+4. Peak Intensity: The hardest or most intense session they have ever had, how they felt physically and mentally afterward, and what the activity was.
+5. Normalization: Why they continued after that hard session, and whether that level of intensity has become a regular part of their routine.
 
 ---
 
 ## Data Stewardship & Ethics
 * Confidentiality: All responses are stored in a secure, write-only database with restricted access.
-* Modality Control: Participants have full autonomy over their preferred response method (Text vs. Voice).
-* Institutional Oversight: This research is conducted under the guidance of the FIU Kinesiology program and follows strict ethical guidelines for data governance and participant privacy.
+* Modality Control: Participants choose written text or voice recording for each prompt.
+* Institutional Oversight: This research is conducted under the guidance of the FIU Kinesiology program and follows ethical guidelines for data governance and participant privacy.
 
 ---
 
