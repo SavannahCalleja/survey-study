@@ -123,6 +123,8 @@ function storageContentTypeForBlob(blob) {
 
 /** Set when eligibility is passed; submitSurvey requires this so the main form cannot be sent without screening. */
 const SCREENING_PASS_STORAGE_KEY = 'research_survey_screening_passed';
+/** Set when the participant agrees to the informed consent letter. */
+const CONSENT_PASS_STORAGE_KEY = 'research_survey_consent_agreed';
 
 function initSupabase() {
   if (!window.supabase || typeof window.supabase.createClient !== 'function') {
@@ -343,15 +345,20 @@ function showError(msg) {
 function showSubmissionSuccessView() {
   try {
     sessionStorage.removeItem(SCREENING_PASS_STORAGE_KEY);
+    sessionStorage.removeItem(CONSENT_PASS_STORAGE_KEY);
   } catch (e) {}
   const survey = document.getElementById('survey-container');
   const success = document.getElementById('success-screen');
   const phase = document.getElementById('screening-phase');
+  const consent = document.getElementById('consent-phase');
   const ineligible = document.getElementById('screening-ineligible');
+  const declined = document.getElementById('consent-declined');
   if (survey) survey.classList.add('is-hidden');
   if (success) success.classList.add('is-visible');
   if (phase) phase.classList.add('is-hidden');
+  if (consent) consent.classList.add('is-hidden');
   if (ineligible) ineligible.classList.remove('is-visible');
+  if (declined) declined.classList.remove('is-visible');
   window.scrollTo(0, 0);
 }
 
@@ -537,28 +544,106 @@ async function persistScreeningScreenout() {
 async function showScreeningIneligible() {
   try {
     sessionStorage.removeItem(SCREENING_PASS_STORAGE_KEY);
+    sessionStorage.removeItem(CONSENT_PASS_STORAGE_KEY);
   } catch (e) {}
   const phase = document.getElementById('screening-phase');
+  const consent = document.getElementById('consent-phase');
   const survey = document.getElementById('survey-container');
   const bad = document.getElementById('screening-ineligible');
+  const declined = document.getElementById('consent-declined');
   if (phase) phase.classList.add('is-hidden');
+  if (consent) consent.classList.add('is-hidden');
   if (survey) survey.classList.add('is-hidden');
   if (bad) bad.classList.add('is-visible');
+  if (declined) declined.classList.remove('is-visible');
   await persistScreeningScreenout();
   window.scrollTo(0, 0);
 }
 
-function showSurveyAfterScreening() {
+function showConsentAfterScreening() {
   try {
     sessionStorage.setItem(SCREENING_PASS_STORAGE_KEY, '1');
+    sessionStorage.removeItem(CONSENT_PASS_STORAGE_KEY);
   } catch (e) {}
   const phase = document.getElementById('screening-phase');
+  const consent = document.getElementById('consent-phase');
   const survey = document.getElementById('survey-container');
   const bad = document.getElementById('screening-ineligible');
+  const declined = document.getElementById('consent-declined');
   if (phase) phase.classList.add('is-hidden');
-  if (survey) survey.classList.remove('is-hidden');
+  if (consent) consent.classList.remove('is-hidden');
+  if (survey) survey.classList.add('is-hidden');
   if (bad) bad.classList.remove('is-visible');
+  if (declined) declined.classList.remove('is-visible');
+  const box = document.getElementById('consent-agree-checkbox');
+  if (box) box.checked = false;
+  updateConsentContinueButton();
   window.scrollTo(0, 0);
+}
+
+function showSurveyAfterConsent() {
+  try {
+    sessionStorage.setItem(CONSENT_PASS_STORAGE_KEY, '1');
+  } catch (e) {}
+  const consent = document.getElementById('consent-phase');
+  const survey = document.getElementById('survey-container');
+  const declined = document.getElementById('consent-declined');
+  if (consent) consent.classList.add('is-hidden');
+  if (survey) survey.classList.remove('is-hidden');
+  if (declined) declined.classList.remove('is-visible');
+  window.scrollTo(0, 0);
+}
+
+function showConsentDeclined() {
+  try {
+    sessionStorage.removeItem(CONSENT_PASS_STORAGE_KEY);
+  } catch (e) {}
+  const phase = document.getElementById('screening-phase');
+  const consent = document.getElementById('consent-phase');
+  const survey = document.getElementById('survey-container');
+  const declined = document.getElementById('consent-declined');
+  if (phase) phase.classList.add('is-hidden');
+  if (consent) consent.classList.add('is-hidden');
+  if (survey) survey.classList.add('is-hidden');
+  if (declined) declined.classList.add('is-visible');
+  window.scrollTo(0, 0);
+}
+
+function isConsentChecked() {
+  const box = document.getElementById('consent-agree-checkbox');
+  return !!(box && box.checked);
+}
+
+function updateConsentContinueButton() {
+  const btn = document.getElementById('consent-continue-btn');
+  if (!btn) return;
+  const ok = isConsentChecked();
+  if (ok) {
+    btn.removeAttribute('disabled');
+    btn.setAttribute('aria-disabled', 'false');
+  } else {
+    btn.disabled = true;
+    btn.setAttribute('aria-disabled', 'true');
+  }
+}
+
+function bindConsentPhase() {
+  const box = document.getElementById('consent-agree-checkbox');
+  const continueBtn = document.getElementById('consent-continue-btn');
+  const declineBtn = document.getElementById('consent-decline-btn');
+  if (box) {
+    box.addEventListener('change', updateConsentContinueButton);
+  }
+  if (continueBtn) {
+    continueBtn.addEventListener('click', function () {
+      if (!isConsentChecked()) return;
+      showSurveyAfterConsent();
+    });
+  }
+  if (declineBtn) {
+    declineBtn.addEventListener('click', showConsentDeclined);
+  }
+  updateConsentContinueButton();
 }
 
 function bindScreeningRadios() {
@@ -671,6 +756,15 @@ async function submitSurvey(ev) {
   } catch (e) {}
   if (!screeningPassed) {
     showError('You must complete the eligibility screening and qualify before you can submit this survey.');
+    return;
+  }
+
+  let consentPassed = false;
+  try {
+    consentPassed = sessionStorage.getItem(CONSENT_PASS_STORAGE_KEY) === '1';
+  } catch (e) {}
+  if (!consentPassed) {
+    showError('You must read and agree to the informed consent information before you can submit this survey.');
     return;
   }
 
@@ -851,7 +945,7 @@ function bindScreeningProceedButton() {
   if (!btn) return;
   btn.addEventListener('click', function () {
     if (!canProceedFromScreening()) return;
-    showSurveyAfterScreening();
+    showConsentAfterScreening();
   });
 }
 
@@ -914,11 +1008,13 @@ function boot() {
   if (screeningPhaseEl && !screeningPhaseEl.classList.contains('is-hidden')) {
     try {
       sessionStorage.removeItem(SCREENING_PASS_STORAGE_KEY);
+      sessionStorage.removeItem(CONSENT_PASS_STORAGE_KEY);
     } catch (e) {}
   }
   bindScreeningRadios();
   bindScreeningProceedButton();
   updateScreeningProceedButton();
+  bindConsentPhase();
   const form = document.getElementById('research-survey');
   if (form) {
     form.addEventListener('submit', submitSurvey);

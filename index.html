@@ -547,6 +547,140 @@
       display: none;
     }
 
+    #consent-phase.consent-phase {
+      box-sizing: border-box;
+      min-height: 100vh;
+      width: 100%;
+      padding: 2rem 1rem 3rem;
+      background: linear-gradient(165deg, #eef2f7 0%, #f5f6fa 45%, #e8ecf2 100%);
+    }
+
+    #consent-phase.is-hidden {
+      display: none;
+    }
+
+    .consent-phase__shell {
+      max-width: 700px;
+      margin: 0 auto;
+    }
+
+    .consent-phase__card {
+      background: #fff;
+      border-radius: 12px;
+      border: 1px solid #c5d0e0;
+      border-left: 5px solid #2a4a6e;
+      box-shadow: 0 8px 32px rgba(8, 30, 63, 0.08);
+      padding: 2rem 2rem 2.25rem;
+    }
+
+    .consent-letter {
+      margin: 0 0 1.75rem 0;
+    }
+
+    .consent-letter h3 {
+      margin: 0 0 0.35rem 0;
+      font-size: 1.05rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: #1a2f4a;
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+
+    .consent-letter__study-title {
+      margin: 0 0 1.15rem 0;
+      font-size: 1.05rem;
+      font-weight: 600;
+      font-style: italic;
+      color: #081e3f;
+      line-height: 1.4;
+    }
+
+    .consent-letter p {
+      margin: 0 0 1rem 0;
+      font-size: 0.95rem;
+      line-height: 1.6;
+      color: #24364f;
+    }
+
+    .consent-letter p:last-child {
+      margin-bottom: 0;
+    }
+
+    .consent-letter ul {
+      margin: 0 0 1rem 0;
+      padding-left: 1.25rem;
+      font-size: 0.95rem;
+      line-height: 1.6;
+      color: #24364f;
+    }
+
+    .consent-letter li {
+      margin: 0 0 0.55rem 0;
+    }
+
+    .consent-agree {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.65rem;
+      margin: 0 0 1.25rem 0;
+      font-size: 0.98rem;
+      font-weight: 600;
+      color: #081e3f;
+      line-height: 1.45;
+      cursor: pointer;
+    }
+
+    .consent-agree input {
+      margin: 0.2rem 0 0 0;
+      width: auto;
+      flex-shrink: 0;
+      accent-color: #B6862C;
+    }
+
+    .consent-actions {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.75rem;
+      padding-top: 0.5rem;
+      border-top: 1px solid #dde4ee;
+    }
+
+    .consent-decline-btn {
+      background: transparent;
+      color: #3d4f6e;
+      border: none;
+      font-size: 0.95em;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: underline;
+      padding: 0.35em 0.5em;
+    }
+
+    .consent-decline-btn:hover {
+      color: #081e3f;
+    }
+
+    #consent-declined.consent-declined {
+      display: none;
+      box-sizing: border-box;
+      min-height: 100vh;
+      width: 100%;
+      margin: 0;
+      padding: 2rem 1.5rem;
+      background-color: #f5f6fa;
+      color: #081e3f;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #consent-declined.consent-declined.is-visible {
+      display: flex;
+    }
+
     #success-screen {
       display: none;
       box-sizing: border-box;
@@ -613,8 +747,16 @@
       }
     }
 
+    .consent-letter a {
+      color: #081e3f;
+      font-weight: 600;
+    }
+
     @media (max-width: 600px) {
       .screening-phase__card {
+        padding: 1.35rem 1.1rem 1.5rem;
+      }
+      .consent-phase__card {
         padding: 1.35rem 1.1rem 1.5rem;
       }
     }
@@ -624,7 +766,7 @@
 <div id="screening-phase" class="screening-phase">
   <div class="screening-phase__shell">
     <div class="screening-phase__card">
-      <p class="screening-phase__eyebrow">Step 1 of 2</p>
+      <p class="screening-phase__eyebrow">Step 1 of 3</p>
       <h2 class="screening-phase__title">Eligibility screening</h2>
       <p class="screening-phase__intro">
         Please answer each question honestly. Your responses determine whether you may continue to the main survey. This section uses different criteria than the questions that follow.
@@ -675,7 +817,7 @@
 
       <div class="screening-proceed-wrap" role="region" aria-label="Continue to main survey">
         <button type="button" id="screening-proceed-btn" class="screening-proceed-btn" disabled aria-disabled="true">
-          Proceed to survey
+          Continue
         </button>
       </div>
     </div>
@@ -686,6 +828,55 @@
   <div class="screening-ineligible__inner">
     <p class="screening-ineligible__text">
       Based on your responses, you do not meet the specific eligibility criteria for this study. We appreciate your time and interest!
+    </p>
+  </div>
+</div>
+
+<div id="consent-phase" class="consent-phase is-hidden">
+  <div class="consent-phase__shell">
+    <div class="consent-phase__card">
+      <p class="screening-phase__eyebrow">Step 2 of 3</p>
+      <h2 class="screening-phase__title">Informed consent</h2>
+      <div class="consent-letter">
+        <h3>Informational Letter</h3>
+        <p class="consent-letter__study-title">Life Changes, Exercise Remains: Experiences of Long-Term Exercise Maintenance</p>
+        <p>Hello, my name is Savannah Calleja. You are being invited to take part in a research study about long-term exercise and the experiences that may help people continue exercising over time. The purpose of this study is to learn how adults who have exercised regularly for at least 10 years describe the experiences that have helped them continue exercising.</p>
+        <p>About 100 people are expected to take part in this study. Taking part will take about 30 minutes.</p>
+        <p>If you agree to take part, you will be asked to:</p>
+        <ul>
+          <li>Complete a short screening to see if you are eligible for the study.</li>
+          <li>Provide basic information about yourself and your exercise history, including your age, biological sex, race/ethnicity, number of years you have exercised, how often you exercise, how long your exercise sessions usually last, and your main type of exercise.</li>
+          <li>Answer five open-ended questions about your exercise experiences. These questions will ask about when you first started exercising, your reasons for exercising and how they may have changed, times when you thought about stopping exercise, difficult or intense exercise experiences, and what helped you continue exercising.</li>
+          <li>Answer the questions by typing your responses or recording audio responses through the study website. If you record your answers, the audio will be converted into written text for the research team to review and study.</li>
+        </ul>
+        <p>There are minimal risks to taking part in this study. Some questions may ask you to think about difficult, intense, or discouraging exercise experiences. Thinking about these experiences may cause temporary discomfort, frustration, or tiredness. You may stop taking part at any time before submitting your responses, without penalty.</p>
+        <p>There are no guaranteed direct benefits to you for taking part in this study. However, you may find it helpful to think about your exercise experiences. This study may help researchers better understand the social, environmental, psychological, and biological factors that may help people continue exercising over many years. The results may also help guide future research and programs designed to help people continue exercising as their lives change.</p>
+        <p>There is no cost to you for taking part in this study, and you will not be paid for participating. If you have questions about the study, you may contact the research team using the contact information provided in this letter.</p>
+        <p>You will not be completely anonymous if you choose to record audio because your voice or information you share may identify you. However, your answers will be kept confidential. Your audio recordings will be stored in a protected study system and will only be available to approved members of the research team. Your audio responses will be converted into written text. Information that could identify you will be removed from the written responses before they are analyzed or shared. Your audio recordings will not be made public and will be permanently deleted after the approved storage period. Written responses with identifying information removed may be kept as required by Florida International University and the Institutional Review Board.</p>
+        <p>If you have questions for one of the researchers conducting this study, you may contact Savannah Calleja at <a href="tel:9419168459">941-916-8459</a> or <a href="mailto:scall041@fiu.edu">scall041@fiu.edu</a>.</p>
+        <p>If you would like to talk with someone about your rights of being a subject in this research study or about ethical issues with this research study, you may contact the FIU Office of Research Integrity by phone at <a href="tel:3053482494">305-348-2494</a> or by email at <a href="mailto:ori@fiu.edu">ori@fiu.edu</a>.</p>
+        <p>Your participation in this research is voluntary, and you will not be penalized or lose benefits if you refuse to participate or decide to stop. You may keep a copy of this form for your records.</p>
+      </div>
+      <label class="consent-agree">
+        <input type="checkbox" id="consent-agree-checkbox" name="consent_agree" value="yes">
+        <span>I have read this information and I agree to take part in this research study.</span>
+      </label>
+      <div class="consent-actions">
+        <button type="button" id="consent-continue-btn" class="screening-proceed-btn" disabled aria-disabled="true">
+          Continue to the study
+        </button>
+        <button type="button" id="consent-decline-btn" class="consent-decline-btn">
+          I do not agree
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="consent-declined" class="consent-declined" aria-live="polite">
+  <div class="screening-ineligible__inner">
+    <p class="screening-ineligible__text">
+      You have chosen not to take part in this study. Thank you for your time.
     </p>
   </div>
 </div>
@@ -894,6 +1085,6 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="js/app.js?v=34"></script>
+<script src="js/app.js?v=35"></script>
 </body>
 </html>
